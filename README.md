@@ -29,6 +29,8 @@ This repository contains code for a Pacman game and a level editor developed in 
 
 2. **Level Editor**: Execute the `Creative_v0_2.py` file to launch the level editor. Use the provided controls to design custom Pacman levels. Save the levels once they're complete for testing in the Pacman game.
 
+3. **Pyxel**: install the [pyxel library](https://github.com/kitao/pyxel) on your python to start my files.
+
 ## Rules
 
 - **Pacman Game**:
