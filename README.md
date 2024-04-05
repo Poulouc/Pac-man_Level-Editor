@@ -12,7 +12,6 @@ This repository contains code for a Pacman game and a level editor developed in 
 
 - **Classic Gameplay**: Experience the classic Pacman gameplay with simple controls and challenging mazes.
 - **Pellets and Power-Ups**: Eat pellets to score points and power-ups to temporarily gain the ability to eat ghosts.
-- **Ghost AI**: Encounter different types of ghost AI with unique behaviors and movement patterns.
 - **Multiple Levels**: Progress through multiple levels with increasing difficulty and complexity.
 - **Help Page**: Access a help page with instructions on how to use the pacman game effectively.
 
