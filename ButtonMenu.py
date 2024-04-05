@@ -1,15 +1,21 @@
+# ============================================================================
+# File    : ButtonMenu.py
+# Autor   : Poulouc and Eraldor
+# Date    : 04/2024
+# Role    : all the button menu and music shared by the creative and the pacman
+# ============================================================================
 import pyxel
 import json
 
 
 def start_up():
     """Indique combien de niveau existe"""
-    with open('info_niveau.json') as file:
+    with open('info_boards.json') as file:
         donnee = json.load(file)
     return donnee
 
 
-def recherche(liste, motifs, depart=0):
+def research(liste, motifs, depart=0):
     """Determine la première occurence de quelque chose dans une liste ou un str"""
     ind_txt = depart
     while ind_txt < len(liste):
@@ -90,12 +96,12 @@ class Menu:
         self.nb_niveau = nb  # indique le nb de niveau dispo
         pyxel.mouse(self.Menu_enabled)
 
-    def selecteur_niveau(self, n):
+    def level_selector(self, n):
         """Permet de faire défiler les niveaux du menu"""
         if 2 <= self.selecteur + n < self.nb_niveau:
             self.selecteur += n
 
-    def est_presser(self):
+    def is_pressed(self):
         """Renvoi la valeur du bouton presser pour définir quel niveau doit être initialisé"""
         for bouton in self.bouton_menu:
             if bouton.is_pressed_LEFT():
