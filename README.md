@@ -46,4 +46,5 @@ This repository contains code for a Pacman game and a level editor developed in 
 
 ## Credits
 
-- **Developers**: Poulouc and Eraldor
+- **Developer**: Poulouc
+- **Contributor**: Eraldor
