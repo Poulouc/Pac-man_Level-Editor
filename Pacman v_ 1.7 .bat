@@ -1,0 +1,1 @@
+"..\..\..\..\moi\python interpreteur\python.exe" Pacman_v1_7.py
