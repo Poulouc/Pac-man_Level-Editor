@@ -1,3 +1,5 @@
+![Alt text](https://github.com/kitao/pyxel "pyxel logo")
+
 # Pacman Game and Level Editor
 
 ## Overview
