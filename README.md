@@ -1,4 +1,4 @@
-![Alt text](https://github.com/kitao/pyxel "pyxel logo")
+![Alt text](https://assets.st-note.com/production/uploads/images/87259797/rectangle_large_type_2_d1c26071b75701d2324ba370eef40b4e.png?fit=bounds&quality=85&width=1280 "pyxel logo")
 
 # Pacman Game and Level Editor
 
