@@ -1,18 +1,18 @@
 # ============================================================================
-# File    : ButtonMenu.py
-# Autor   : Poulouc and Eraldor
-# Date    : 04/2024
-# Role    : all the button menu and music shared by the creative and the pacman
+# File    : menu_button.py
+# Authors : Poulouc and Eraldor
+# Date    : April 2024
+# Role    : All the button menu and music shared by the creative and the pacman
 # ============================================================================
 import pyxel
 import json
 
 
 def start_up():
-    """Indique combien de niveau existe"""
-    with open('info_boards.json') as file:
-        donnee = json.load(file)
-    return donnee
+    """Indicates the existing levels and their associated information"""
+    with open('./boards/info.json') as file:
+        data = json.load(file)
+    return data
 
 
 def research(liste, motifs, depart=0):
@@ -25,7 +25,7 @@ def research(liste, motifs, depart=0):
     return 0
 
 
-class Hitbox: # by Eraldor
+class Hitbox:  # by Eraldor
     def __init__(self, x: int, y: int, width: int, height: int):
         self.x = x
         self.y = y
@@ -44,7 +44,7 @@ class Hitbox: # by Eraldor
         return pyxel.mouse_x - self.x, pyxel.mouse_y - self.y
 
 
-class Button: # by Eraldor and Magistro
+class Button:  # by Eraldor and Magistro
     def __init__(self, x: int, y: int, width: int, height: int, text: str):
         self.x = x
         self.y = y
@@ -63,7 +63,7 @@ class Button: # by Eraldor and Magistro
                        self.y + self.height // 2 - 3,
                        self.text, 0)
 
-    def is_pressed_LEFT(self):
+    def does_left_click(self):
         if self.enabled and pyxel.btnp(pyxel.MOUSE_BUTTON_LEFT):
             self._pressed = self._hitbox.is_contained(pyxel.mouse_x, pyxel.mouse_y)
             return self._pressed
@@ -71,7 +71,7 @@ class Button: # by Eraldor and Magistro
             self._pressed = False
         return False
 
-    def is_pressed_RIGHT(self):
+    def does_right_click(self):
         if self.enabled and pyxel.btnp(pyxel.MOUSE_BUTTON_RIGHT):
             self._pressed = self._hitbox.is_contained(pyxel.mouse_x, pyxel.mouse_y)
             return self._pressed
@@ -84,47 +84,47 @@ class Button: # by Eraldor and Magistro
 
 
 class Menu:
-    def __init__(self, high, larg, nb):
+    def __init__(self, height, width, nb):
         self.Menu_enabled = True
         self.name = "| Select Level |"
-        self.haut = high
-        self.large = larg
-        self.selecteur = 2  # sélecteur de niveau dans le menu
-        self.bouton_menu = [Button(self.large * 20 // 100 - 22, self.haut // 2 - 22, 45, 45, ""),
-                            Button(self.large * 50 // 100 - 22, self.haut // 2 - 22, 45, 45, ""),
-                            Button(self.large * 80 // 100 - 22, self.haut // 2 - 22, 45, 45, "")]  # bouton du menu
-        self.nb_niveau = nb  # indique le nb de niveau dispo
+        self.height = height
+        self.width = width
+        self.selector = 2  # level selector in the menu
+        self.menu_btn = [Button(self.width * 20 // 100 - 22, self.height // 2 - 22, 45, 45, ""),
+                         Button(self.width * 50 // 100 - 22, self.height // 2 - 22, 45, 45, ""),
+                         Button(self.width * 80 // 100 - 22, self.height // 2 - 22, 45, 45, "")]  # bouton du menu
+        self.nb_levels = nb  # amount of available levels
         pyxel.mouse(self.Menu_enabled)
 
     def level_selector(self, n):
         """Permet de faire défiler les niveaux du menu"""
-        if 2 <= self.selecteur + n < self.nb_niveau:
-            self.selecteur += n
+        if 2 <= self.selector + n < self.nb_levels:
+            self.selector += n
 
     def is_pressed(self):
         """Renvoi la valeur du bouton presser pour définir quel niveau doit être initialisé"""
-        for bouton in self.bouton_menu:
-            if bouton.is_pressed_LEFT():
+        for bouton in self.menu_btn:
+            if bouton.does_left_click():
                 return int(bouton.text)
 
     def toggle_menu(self):
         """Désactive/Active l'affichage du menu et ses boutons"""
         self.Menu_enabled = not self.Menu_enabled
         pyxel.mouse(self.Menu_enabled)
-        for bouton in self.bouton_menu:
+        for bouton in self.menu_btn:
             bouton.toggle()
 
     def draw(self):
-        pyxel.text(self.large // 2 - len(self.name) - 22, self.haut * 30 // 100, self.name, 6)
-        pyxel.text(self.bouton_menu[1].y + 372, self.haut // 2, ">", 6)
-        pyxel.text(self.bouton_menu[1].y - 350, self.haut // 2, "<", 6)
+        pyxel.text(self.width // 2 - len(self.name) - 22, self.height * 30 // 100, self.name, 6)
+        pyxel.text(self.menu_btn[1].y + 372, self.height // 2, ">", 6)
+        pyxel.text(self.menu_btn[1].y - 350, self.height // 2, "<", 6)
         for i in range(0, 3, 1):
-            if i < self.nb_niveau:
-                self.bouton_menu[i].text = str(self.selecteur - 2 + i)
+            if i < self.nb_levels:
+                self.menu_btn[i].text = str(self.selector - 2 + i)
             else:
-                pyxel.text(self.large // 2 - 25, self.haut * 60 // 100, "no more level", 6)
-                self.bouton_menu[i].text = str("0")
-            self.bouton_menu[i].draw()
+                pyxel.text(self.width // 2 - 25, self.height * 60 // 100, "no more level", 6)
+                self.menu_btn[i].text = str("0")
+            self.menu_btn[i].draw()
 
 
 class Soundtrack:

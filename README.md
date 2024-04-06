@@ -18,7 +18,7 @@ This repository contains code for a Pacman game and a level editor developed in 
 
 ### Level Editor
 
-- **User-Friendly Interface**: Intuitive interface for designing Pacman levels with ease.
+- **User-friendly Interface**: Intuitive interface for designing Pacman levels with ease.
 - **Customization**: Place different elements on the board, including walls, Pacman, ghosts, portals, and power-ups.
 - **Level Saving**: Save designed levels for later use and testing.
 - **Mirror Functionality**: Create mirrored versions of the board for added challenge and variety.
@@ -45,5 +45,5 @@ This repository contains code for a Pacman game and a level editor developed in 
 
 ## Credits
 
-- **Developer**: Poulouc
-- **Contributor**: Eraldor
+- **Main developer**: Poulouc ([@Poulouc](https://github.com/Poulouc))
+- **Occasional contributor**: Eraldor ([@Eraldorure](https://github.com/Eraldorure))
