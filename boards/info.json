@@ -19,7 +19,8 @@
                 27
             ]
         ],
-        "score": 1748
+        "score": 1748,
+        "locked": true
     },
     {
         "file-name": "board_1.txt",
@@ -41,7 +42,8 @@
                 30
             ]
         ],
-        "score": 2006
+        "score": 2006,
+        "locked": true
     },
     {
         "file-name": "board_2.txt",
@@ -63,6 +65,7 @@
                 14
             ]
         ],
-        "score": 1563
+        "score": 1563,
+        "locked": false
     }
 ]

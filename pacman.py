@@ -1,15 +1,15 @@
 # ============================================================================
 # File    : pacman.py
-# Version : v1.7
 # Author  : Poulouc
-# Date    : April 2024
+# Date    : April 7th, 2024
 # Role    : Playing Pacman
 # ============================================================================
+
 import json
+import pyxel
 from random import randint
 from time import monotonic
-import pyxel
-from code import menu_button
+from code import interface
 
 
 # character decor file --> pyxel edit pyxel_res
@@ -29,10 +29,10 @@ from code import menu_button
 # pacman and ghost follow the rules of the board and cannot cross the walls defined in impassable
 
 class Pacman:
-    """Allows playing Pac-Man with the ability to add levels via Creatif"""
+    """Allows playing Pac-Man with the ability to add levels via the creative mode"""
     def __init__(self, speed=6):
         """Basic initialization of Pac-Man"""
-        self.ghost = [[None, None, [0, 0], False] for _ in range(4)]
+        self.ghosts = [[None, None, [0, 0], False] for _ in range(4)]
         # each value for a ghost is composed of its x, y coordinates, the direction taken, and whether it's edible
         self.coordinate = [[-1, 0], [0, -1], [1, 0], [0, 1]]  # up, left, down, right, and very important order as the opposite of where we go -2 is where we come from important for ghost
         self.impassable = {"-": [0, 80], "|": [16, 80], ".": [48, 96], "+": [32, 96], "<": [16, 96], ">": [0, 96],
@@ -43,17 +43,17 @@ class Pacman:
         self.board = []  # game board
         self.original = []  # [pxy, fxy, tp, selected level]
         self.pacman = []  # [pxy, [0, 0]]  # pacman's location and previous direction taken
-        self.life = 3  # pacman's number of lives
+        self.lives = 3  # pacman's number of lives
         self.temporary_edible = 0  # time when ghosts are edible
         self.pause = 0  # game pause time
         self.nb_ghosts = 0  # number of ghosts already on the field
         self.high_score = 0
         self.offset = 0
-        self.start_button = menu_button.start_up()
+        self.start_button = interface.start_up()
         pyxel.init(700, 700, title="Pac-man", fps=speed)
-        self.menu = menu_button.Menu(pyxel.height, pyxel.width, len(self.start_button))
+        self.menu = interface.Menu(pyxel.height, pyxel.width, len(self.start_button))
         pyxel.camera(0, 0)
-        pyxel.load("./pyxel_res.zip")  # loads the board items from the pyxel_resource_file.zip folder
+        pyxel.load("./pyxel_res.pyxres")  # loads the resources from the dedicated file
         pyxel.run(self.update, self.draw)
         pyxel.run(self.update, self.draw)
 
@@ -71,12 +71,11 @@ class Pacman:
         self.points = self.nb_points()
         self.time = monotonic()
         self.pause = 3
-        self.life = 3
+        self.lives = 3
         self.nb_ghosts = 0
         self.temporary_edible = 0
         self.offset = pyxel.width // 2 - len(self.board[0]) * 16 // 2 + 15  # to center(ish) the board
-        menu_button.Soundtrack()
-        pyxel.play(0, [0, 1], loop=False)  # makes sure the instruction was correctly loaded
+        pyxel.playm(0)
 
     def best_score(self):
         if self.points > self.high_score:
@@ -116,9 +115,9 @@ class Pacman:
             self.event()
             self.board[self.pacman[0][0]][self.pacman[0][1]] = "0"
 
-    def eatable(self, t):
+    def edible(self, t):
         for i in range(self.nb_ghosts):
-            self.ghost[i][3] = True
+            self.ghosts[i][3] = True
         self.temporary_edible = monotonic() - self.time + t
 
     def event(self):
@@ -128,20 +127,20 @@ class Pacman:
         -a ghost ate Pacman"""
         i = 0
         if self.board[self.pacman[0][0]][self.pacman[0][1]] == "!":
-            self.eatable(7)
+            self.edible(7)
         elif self.board[self.pacman[0][0]][self.pacman[0][1]] == "*":
             self.points += 100
-            self.eatable(10)
+            self.edible(10)
         while self.nb_ghosts > i:
-            if self.ghost[i][3] and self.ghost[i][:2] == self.pacman[0]:  # if the ghost is edible and eaten
-                self.ghost[i] = [self.original[1][0], self.original[1][1], [0, 0], False]
+            if self.ghosts[i][3] and self.ghosts[i][:2] == self.pacman[0]:  # if the ghost is edible and eaten
+                self.ghosts[i] = [self.original[1][0], self.original[1][1], [0, 0], False]
                 self.points += 200
-            elif not self.ghost[i][3] and self.ghost[i][:2] == self.pacman[0]:
+            elif not self.ghosts[i][3] and self.ghosts[i][:2] == self.pacman[0]:
                 # if the ghost is not edible and encountered
                 for j in range(self.nb_ghosts):
-                    self.ghost[j] = [self.original[1][0], self.original[1][1], [0, 0], False]
+                    self.ghosts[j] = [self.original[1][0], self.original[1][1], [0, 0], False]
                 self.pacman = [self.original[0][:], [0, 0]]
-                self.life -= 1
+                self.lives -= 1
                 self.pause = monotonic() - self.time + 3
             i += 1
 
@@ -184,7 +183,7 @@ class Pacman:
 
     def update(self):
         pyxel.cls(0)  # set to 1 to understand how the display works
-        if self.menu.Menu_enabled:
+        if self.menu.menu_enabled:
             if pyxel.btnp(pyxel.KEY_LEFT) or pyxel.btn(pyxel.KEY_Q):
                 self.menu.level_selector(-1)
             elif pyxel.btnp(pyxel.KEY_RIGHT) or pyxel.btn(pyxel.KEY_D):
@@ -210,28 +209,28 @@ class Pacman:
         """Makes the ghosts play each their turn like on a board game"""
         if self.nb_ghosts < 4 and monotonic() - self.time > [10, 20, 30, 35][
                 self.nb_ghosts]:  # makes the ghosts appear
-            self.ghost[self.nb_ghosts][:2] = [self.original[1][0], self.original[1][1]]
+            self.ghosts[self.nb_ghosts][:2] = [self.original[1][0], self.original[1][1]]
             self.nb_ghosts += 1
         if monotonic() - self.time > self.temporary_edible:  # makes them inedible
             for jsp in range(self.nb_ghosts):
-                self.ghost[jsp][3] = False
+                self.ghosts[jsp][3] = False
             self.temporary_edible = 0
         for ghost in range(self.nb_ghosts):  # makes them play
-            self.auto_mod(self.ghost[ghost])
+            self.auto_mod(self.ghosts[ghost])
 
     def ghost_draw(self, coordonnee):
         for ectoplasme in range(self.nb_ghosts):
-            if self.ghost[ectoplasme][3] and self.temporary_edible < monotonic() - self.time + 2 and \
-                    self.ghost[ectoplasme][:2] == coordonnee:
+            if self.ghosts[ectoplasme][3] and self.temporary_edible < monotonic() - self.time + 2 and \
+                    self.ghosts[ectoplasme][:2] == coordonnee:
                 pyxel.blt(16 * coordonnee[1] - 8 + self.offset, 16 * coordonnee[0] - 8 + self.offset, 0,
                           16 * (pyxel.frame_count % 2), 64, 16, 16)
-            elif self.ghost[ectoplasme][3] and self.ghost[ectoplasme][:2] == coordonnee:
+            elif self.ghosts[ectoplasme][3] and self.ghosts[ectoplasme][:2] == coordonnee:
                 pyxel.blt(16 * coordonnee[1] - 8 + self.offset, 16 * coordonnee[0] - 8 + self.offset, 0, 0, 64, 16, 16)
-            elif self.ghost[ectoplasme][:2] == coordonnee:
+            elif self.ghosts[ectoplasme][:2] == coordonnee:
                 pyxel.blt(16 * coordonnee[1] - 8 + self.offset, 16 * coordonnee[0] - 8 + self.offset, 0,
-                          menu_button.research(self.coordinate, self.ghost[ectoplasme][2], 0) * 16 + 32, ectoplasme * 16, 16, 16)
+                          interface.research(self.coordinate, self.ghosts[ectoplasme][2], 0) * 16 + 32, ectoplasme * 16, 16, 16)
 
-    def coutdown(self):
+    def countdown(self):
         if monotonic() - self.time + 3 > self.pause > monotonic() - self.time:  # 3 sec countdown
             pyxel.blt(self.offset // 2, self.offset // 2, 0, [48, 24, 0][-int(monotonic() - self.pause - self.time)],
                       112, 24, 35)
@@ -241,14 +240,14 @@ class Pacman:
         pyxel.text(10, pyxel.height - 30, "Press H to put pause and see how to play", 10)
         pyxel.text(pyxel.width * 90 // 100, 20,
                    "High Score : " + str(self.high_score) + 2 * "\n" + str(self.points - self.nb_points()) + " : points", 7)
-        for i in range(self.life):  # displays the number of lives by displaying pacmans
+        for i in range(self.lives):  # displays the number of lives by displaying pacmans
             pyxel.blt(16 * i + 5, 5, 0, 16, 0, 16, 16)
-        self.coutdown()
+        self.countdown()
 
     def draw(self):
         pyxel.blt(pyxel.width // 2 - 50, 10, 0, 0, 152, 111, 16)
         # displays the menu
-        if self.menu.Menu_enabled:
+        if self.menu.menu_enabled:
             self.menu.draw()
             val = self.menu.is_pressed()
             if val is not None and val < len(self.start_button):
@@ -258,21 +257,21 @@ class Pacman:
             # game instructions
             if self.show:
                 pyxel.text(pyxel.width // 2 - 30, pyxel.height // 2 - 50,
-                           "Up or Z to go up" + 2 * "\n" + "Left or Q to go left " + 2 * "\n" +
-                           "Down or S to go down" + 2 * "\n" + "Right or D to go right" + 2 * "\n" +
-                           "Echap to exit the game", 6)
+                           "Up or Z to go up\n\nLeft arrow or Q to go left\n\n"
+                           "Down or S to go down\n\nRight arrow or D to go right\n\n"
+                           "Esc to exit the game", 6)
                 self.pause = monotonic() - self.time + 3
                 pyxel.text(10, pyxel.height - 30, "Press H to play ", 10)
             elif self.points - self.nb_points() == self.points:  # if there are no more gums on the ground
                 pyxel.blt(pyxel.width // 2 - 50, pyxel.height // 2 - 30, 0, 0, 168 + 16 * (pyxel.frame_count % 2), 111, 16)
-                pyxel.text(pyxel.width * 90 // 100, 20, "High Score : " + str(self.high_score) + 2 * "\n" + str(
-                    self.points - self.nb_points()) + " : points", 7)
+                pyxel.text(pyxel.width * 90 // 100, 20, "High Score: " + str(self.high_score) + "\n\n" + str(
+                    self.points - self.nb_points()) + " points", 7)
                 self.best_score()  # saves the new best score only if you win
-                self.coutdown()
+                self.countdown()
                 self.restart()
-            elif self.life == 0:  # if there are no more lives
+            elif self.lives == 0:  # if there are no more lives
                 pyxel.text(pyxel.width // 2, pyxel.height // 2 - 8, 'You Lose', pyxel.frame_count % 3 + 10)
-                self.coutdown()
+                self.countdown()
                 self.restart()
             else:
                 self.player_indicator()
@@ -281,7 +280,7 @@ class Pacman:
                         if self.pacman[0] == [i, j]:  # displays our star
                             pyxel.blt(16 * j - 16 // 2 + self.offset, 16 * i - 16 // 2 + self.offset, 0,
                                       16 * (pyxel.frame_count % 2),
-                                      16 * menu_button.research([[1, 0], [0, 1], [0, -1], [-1, 0]], self.pacman[1], 0), 16,
+                                      16 * interface.research([[1, 0], [0, 1], [0, -1], [-1, 0]], self.pacman[1], 0), 16,
                                       16)
                         elif self.board[i][j] == "1":  # displays the pac-gums
                             pyxel.circ(16 * j + self.offset - 1, 16 * i + self.offset - 1, 2, 10)

@@ -1,12 +1,12 @@
 # ============================================================================
 # File    : pacman.py
-# Version : v0.2
 # Author  : Poulouc
-# Date    : April 2024
+# Updated : April 7th, 2024
 # Role    : Creating board for the Pacman
 # ============================================================================
+
 import pyxel
-from code import menu_button
+from code import interface
 import json
 
 
@@ -18,18 +18,18 @@ class Creative:
                        "+": [32, 96], ".": [48, 96], "pac-gum": "1", "super pac-gum": "!", "0": "nothing", "portal": "*", "=": "="}
         self.object_list = list(self.object.keys())
         self.show = False
-        self.records = menu_button.start_up()
+        self.records = interface.start_up()
         self.level_selected = -2  # keeps track of the loaded level
         self.offset = 0  # used to center the board
         pyxel.init(900, 900, title="Creative mode", fps=60, display_scale=1)
-        self.other_buttons = [menu_button.Button(pyxel.height // 2 - 22, pyxel.width * 65 // 100, 45, 45, 'New'),
-                              menu_button.Button(pyxel.height - 25, pyxel.width - 25, 20, 20, "Menu"),
-                              menu_button.Button(pyxel.height - 25, pyxel.width - 55, 20, 20, "+|+")]
-        self.menu = menu_button.Menu(pyxel.height, pyxel.width, len(self.records))
+        self.other_buttons = [interface.Button(pyxel.height // 2 - 22, pyxel.width * 65 // 100, 45, 45, 'New'),
+                              interface.Button(pyxel.height - 25, pyxel.width - 25, 20, 20, "Menu"),
+                              interface.Button(pyxel.height - 25, pyxel.width - 55, 20, 20, "+|+")]
+        self.menu = interface.Menu(pyxel.height, pyxel.width, len(self.records))
         self.other_buttons[1].toggle()
         self.menu.name = "| Select Level to Edit |"
         pyxel.camera(0, 0)
-        pyxel.load("./pyxel_res.zip")
+        pyxel.load("./pyxel_res.pyxres")
         pyxel.run(self.update, self.draw)
 
     def initialize(self, n):
@@ -41,7 +41,7 @@ class Creative:
                 self.buttons.append([])
                 for j in range(self.selection[1]):
                     self.buttons[i].append(
-                        menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, ""))
+                        interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, ""))
         else:
             with open("./boards/" + self.records[self.level_selected]['file-name']) as f:
                 board = f.read().splitlines()
@@ -54,24 +54,23 @@ class Creative:
                 for j in range(len(level[i])):
                     if [i, j] == self.records[self.level_selected]["pacman-spawn"]:
                         self.buttons[i].append(
-                            menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pacman"))
+                            interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pacman"))
                     elif [i, j] == self.records[self.level_selected]["ghost-spawn"]:
                         self.buttons[i].append(
-                            menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "ghost"))
+                            interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "ghost"))
                     elif self.records[n]["tp"] != [] and ([i, j] == self.records[n]["tp"][0] or [i, j] == self.records[n]["tp"][1]):
                         self.buttons[i].append(
-                            menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "portal"))
+                            interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "portal"))
                     elif level[i][j] == "1":
                         self.buttons[i].append(
-                            menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pac-gum"))
+                            interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pac-gum"))
                     elif level[i][j] == "!":
                         self.buttons[i].append(
-                            menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "super pac-gum"))
+                            interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "super pac-gum"))
                     else:
                         self.buttons[i].append(
-                            menu_button.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, str(level[i][j])))
-        menu_button.Soundtrack()  # check if the board was correctly loaded
-        pyxel.play(0, [0, 1], loop=False)
+                            interface.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, str(level[i][j])))
+        pyxel.playm(0)
 
     def selector(self, i):
         if 0 <= self.selection[2] + i < len(self.object_list):
@@ -158,12 +157,12 @@ class Creative:
             while i < j:  # that's freaking hard to implement symmetry
                 if self.buttons[g][i].text != "" and self.buttons[g][j].text == "":
                     if self.buttons[g][i].text in inverse:
-                        self.buttons[g][j].text = inverse[menu_button.research(inverse, self.buttons[g][i].text) - 2]
+                        self.buttons[g][j].text = inverse[interface.research(inverse, self.buttons[g][i].text) - 2]
                     else:
                         self.buttons[g][j].text = self.buttons[g][i].text
                 elif self.buttons[g][j].text != "" and self.buttons[g][i].text == "":
                     if self.buttons[g][j].text in inverse:
-                        self.buttons[g][i].text = inverse[menu_button.research(inverse, self.buttons[g][j].text) - 2]
+                        self.buttons[g][i].text = inverse[interface.research(inverse, self.buttons[g][j].text) - 2]
                     else:
                         self.buttons[g][i].text = self.buttons[g][j].text
                 i += 1
@@ -173,7 +172,7 @@ class Creative:
         pyxel.cls(0)
         if pyxel.btnp(pyxel.KEY_H):  # show help page
             self.show = not self.show
-        elif self.menu.Menu_enabled:
+        elif self.menu.menu_enabled:
             if pyxel.btn(pyxel.KEY_Q):
                 self.menu.level_selector(-1)
             elif pyxel.btn(pyxel.KEY_D):
@@ -195,7 +194,7 @@ class Creative:
                     elif self.buttons[i][j].does_left_click() and self.buttons[i][j].text != "":
                         self.buttons[i][j].text = ""
                     elif self.buttons[i][j].does_right_click() and self.buttons[i][j].text != "":
-                        self.selection[2] = menu_button.research(self.object_list, self.buttons[i][j].text, 0)
+                        self.selection[2] = interface.research(self.object_list, self.buttons[i][j].text, 0)
             if self.other_buttons[1].does_left_click():
                 self.toggle_creative(-2)
             elif self.other_buttons[2].does_left_click():
@@ -214,15 +213,15 @@ class Creative:
         if self.show:
             pyxel.text(pyxel.width // 2 - 100, pyxel.height // 2 - 150,
                        "| Menu |\n\n\n\n"
-                       "mouse wheel, key Q or key D to scroll\n\n"
-                       "UP or Down to select the height of the new level\n\n"
-                       "Right or Left to select the width of the new level\n\n\n\n"
-                       "| Create |\n\n\n\n"
-                       "Press Q, mousse wheel or left to scroll to the left in the items selector\n\n"
-                       "Press D, mousse wheel or right to scroll to the right in the items selector\n\n"
-                       "Click left to push the item selected\n\n"
+                       "Use the Mouse wheel, Q or D to scroll through the levels\n\n"
+                       "Up and Down arrows to select the height of the new level\n\n"
+                       "Right and Left arrows to select the width of the new level\n\n\n\n"
+                       "| Level creator |\n\n\n\n"
+                       "Press Q, Mouse wheel or Left arrow to scroll to the left in the items selector\n\n"
+                       "Press D, mouse wheel or Right arrow to scroll to the right in the items selector\n\n"
+                       "Use the Left arrow to push the item selected\n\n"
                        "Choose a little square to place the item selected\n\n"
-                       "Click right to copy the item on the board\n\n\n\n"
+                       "Right-click to copy the item on the board\n\n\n\n"
                        "| Rules |\n\n\n\n"
                        "You can't place more than 1 pacman\n\n"
                        "You can't place more than 1 ghost\n\n"
@@ -231,9 +230,9 @@ class Creative:
                        "All the squares must be filled\n\n"
                        "You must place at least 1 portal\n\n"
                        "The corridors can't be wider than 1 square\n\n\n\n"
-                       "Esc to exit the game\n\n"
-                       "R to save the level", 6)
-        elif self.menu.Menu_enabled:
+                       "Press Esc to exit the game\n\n"
+                       "Press R to save the level", 6)
+        elif self.menu.menu_enabled:
             self.other_buttons[0].draw()
             pyxel.text(self.other_buttons[0].x + 20, self.other_buttons[0].y + 60, str(self.selection[1]), 6)
             pyxel.text(self.other_buttons[0].x - 20, self.other_buttons[0].y + 23, str(self.selection[0]), 6)
@@ -266,7 +265,8 @@ class Creative:
                     elif self.buttons[i][j].text == "=":
                         pyxel.text(self.buttons[i][j].x + 6, self.buttons[i][j].y + 6, "+", 6)
                     else:
-                        pyxel.blt(self.buttons[i][j].x, self.buttons[i][j].y, 0, self.object[self.buttons[i][j].text][0], self.object[self.buttons[i][j].text][1],
+                        pyxel.blt(self.buttons[i][j].x, self.buttons[i][j].y, 0,
+                                  self.object[self.buttons[i][j].text][0], self.object[self.buttons[i][j].text][1],
                                   16, 16)
             if self.object_list[self.selection[2]] == "pac-gum":
                 pyxel.circ(20 + 8, 10 + 8, 2, 10)
@@ -286,7 +286,6 @@ class Creative:
             pyxel.text(8, 15, '<', 6)
             pyxel.text(45, 15, ">", 6)
             if self.is_board_correct():  # shows a smile if the board is constructed correctly
-                pyxel.text(pyxel.width - 50, 10, ':)', 6)
                 pyxel.text(pyxel.width - 50, 10, ':)', 6)
             else:
                 pyxel.text(pyxel.width - 50, 10, ':(', 6)
