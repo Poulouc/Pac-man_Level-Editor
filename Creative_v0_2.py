@@ -5,7 +5,7 @@
 # Role    : Creating board for the Pacman
 # ============================================================================
 import pyxel
-import ButtonMenu
+import interfaces
 import json
 
 
@@ -17,16 +17,16 @@ class Creative:
                       "+": [32, 96], ".": [48, 96], "pacgomme": "1", "super pacgomme": "!", "0": "nothing", "portal": "*", "=": "="}
         self.object_list = list(self.object.keys())
         self.show = False
-        self.records = ButtonMenu.start_up()
+        self.records = interfaces.start_up()
         self.level_selected = -2  # keeps track of the loaded level
         self.offset = 0  # used to center the board
-        pyxel.init(900, 900, title="Creativ mod", fps=60, display_scale=1)
-        self.other_buttons = [ButtonMenu.Button(pyxel.height // 2 - 22, pyxel.width * 65 // 100, 45, 45, 'New'), ButtonMenu.Button(pyxel.height - 25, pyxel.width - 25, 20, 20, "Menu"), ButtonMenu.Button(pyxel.height - 25, pyxel.width - 55, 20, 20, "+|+")]
-        self.menu = ButtonMenu.Menu(pyxel.height, pyxel.width, len(self.records))
+        pyxel.init(900, 900, title="Creative mod", fps=60, display_scale=1)
+        self.other_buttons = [interfaces.Button(pyxel.height // 2 - 22, pyxel.width * 65 // 100, 45, 45, 'New'), interfaces.Button(pyxel.height - 25, pyxel.width - 25, 20, 20, "Menu"), interfaces.Button(pyxel.height - 25, pyxel.width - 55, 20, 20, "+|+")]
+        self.menu = interfaces.Menu(pyxel.height, pyxel.width, len(self.records))
         self.other_buttons[1].toggle()
         self.menu.name = "| Select Level to Edit |"
         pyxel.camera(0, 0)
-        pyxel.load("PYXEL_RESOURCE_FILE.zip")
+        pyxel.load("PYXEL_RESOURCE_FILE.pyxres")
         pyxel.run(self.update, self.draw)
 
     def initialize(self, n):
@@ -38,9 +38,9 @@ class Creative:
                 self.buttons.append([])
                 for j in range(self.selection[1]):
                     self.buttons[i].append(
-                        ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, ""))
+                        interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, ""))
         else:
-            with open(self.records[self.level_selected]['file-name']) as f:
+            with open("./levels_files/" + self.records[self.level_selected]['file-name']) as f:
                 board = f.read().splitlines()
             level = []
             for val in board:
@@ -50,18 +50,18 @@ class Creative:
                 self.buttons.append([])
                 for j in range(len(level[i])):
                     if [i, j] == self.records[self.level_selected]["pacman-spawn"]:
-                        self.buttons[i].append(ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pacman"))
+                        self.buttons[i].append(interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pacman"))
                     elif [i, j] == self.records[self.level_selected]["ghost-spawn"]:
-                        self.buttons[i].append(ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "ghost"))
+                        self.buttons[i].append(interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "ghost"))
                     elif self.records[n]["tp"] != [] and ([i, j] == self.records[n]["tp"][0] or [i, j] == self.records[n]["tp"][1]):
-                        self.buttons[i].append(ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "portal"))
+                        self.buttons[i].append(interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "portal"))
                     elif level[i][j] == "1":
-                        self.buttons[i].append(ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pacgomme"))
+                        self.buttons[i].append(interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "pacgomme"))
                     elif level[i][j] == "!":
-                        self.buttons[i].append(ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "super pacgomme"))
+                        self.buttons[i].append(interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, "super pacgomme"))
                     else:
-                        self.buttons[i].append(ButtonMenu.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, str(level[i][j])))
-        ButtonMenu.Soundtrack()  # check if the board was correctly loaded
+                        self.buttons[i].append(interfaces.Button(16 * j + 30 + j * 3 + self.offset, 16 * i + 30 + i * 3 + self.offset, 16, 16, str(level[i][j])))
+        interfaces.Soundtrack()  # check if the board was correctly loaded
         pyxel.play(0, [0, 1], loop=False)
 
     def selector(self, i):
@@ -94,18 +94,18 @@ class Creative:
                 board_txt += "\n"
                 print(board_txt)
             if self.level_selected == -1:
-                with open("info_boards.json", "w") as info_niveau:
-                    json.dump(self.records + [{"file-name": "plateau_" + str(len(self.records)) + ".txt", "pacman-spawn": pacman,
+                with open("levels_files/info_boards.json", "w") as info_niveau:
+                    json.dump(self.records + [{"file-name": "board_" + str(len(self.records)) + ".txt", "pacman-spawn": pacman,
                                            "ghost-spawn": ghost, "tp": tp, "score": 0}], info_niveau, indent=2)
-                with open("plateau_" + str(len(self.records)) + ".txt", "w") as f:
+                with open("./levels_files/" + "board_" + str(len(self.records)) + ".txt", "w") as f:
                     f.write(board_txt)
             else:
-                self.records[self.level_selected] = {"file-name": "plateau_" + str(self.level_selected) + ".txt",
+                self.records[self.level_selected] = {"file-name": "board_" + str(self.level_selected) + ".txt",
                                                    "pacman-spawn": pacman,
                                                    "ghost-spawn": ghost, "tp": tp, "score": 0}
-                with open("info_boards.json", "w") as info_niveau:
+                with open("levels_files/info_boards.json", "w") as info_niveau:
                     json.dump(self.records, info_niveau, indent=2)
-                with open("plateau_" + str(self.level_selected) + ".txt", "w") as f:
+                with open("./levels_files/" + "board_" + str(self.level_selected) + ".txt", "w") as f:
                     f.write(board_txt)
 
     def plateau_bien_construit(self):
@@ -141,12 +141,12 @@ class Creative:
             while i < j:  # compliqué de faire le mirroir du centre
                 if self.buttons[g][i].text != "" and self.buttons[g][j].text == "":
                     if self.buttons[g][i].text in inverse:
-                        self.buttons[g][j].text = inverse[ButtonMenu.research(inverse, self.buttons[g][i].text) - 2]
+                        self.buttons[g][j].text = inverse[interfaces.research(inverse, self.buttons[g][i].text) - 2]
                     else:
                         self.buttons[g][j].text = self.buttons[g][i].text
                 elif self.buttons[g][j].text != "" and self.buttons[g][i].text == "":
                     if self.buttons[g][j].text in inverse:
-                        self.buttons[g][i].text = inverse[ButtonMenu.research(inverse, self.buttons[g][j].text) - 2]
+                        self.buttons[g][i].text = inverse[interfaces.research(inverse, self.buttons[g][j].text) - 2]
                     else:
                         self.buttons[g][i].text = self.buttons[g][j].text
                 i += 1
@@ -178,7 +178,7 @@ class Creative:
                     elif self.buttons[i][j].is_pressed_LEFT() and self.buttons[i][j].text != "":
                         self.buttons[i][j].text = ""
                     elif self.buttons[i][j].is_pressed_RIGHT() and self.buttons[i][j].text != "":
-                        self.selection[2] = ButtonMenu.research(self.object_list, self.buttons[i][j].text, 0)
+                        self.selection[2] = interfaces.research(self.object_list, self.buttons[i][j].text, 0)
             if self.other_buttons[1].is_pressed_LEFT():
                 self.crea_toggle(-2)
             elif self.other_buttons[2].is_pressed_LEFT():

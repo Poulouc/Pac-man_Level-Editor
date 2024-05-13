@@ -1,5 +1,5 @@
 # ============================================================================
-# File    : ButtonMenu.py
+# File    : interfaces.py
 # Autor   : Poulouc and Eraldor
 # Date    : 04/2024
 # Role    : all the button menu and music shared by the creative and the pacman
@@ -10,7 +10,7 @@ import json
 
 def start_up():
     """Indique combien de niveau existe"""
-    with open('info_boards.json') as file:
+    with open('./levels_files/info_boards.json') as file:
         donnee = json.load(file)
     return donnee
 

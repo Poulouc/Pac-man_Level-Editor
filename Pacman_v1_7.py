@@ -8,7 +8,7 @@ import json
 from random import randint
 from time import monotonic
 import pyxel
-import ButtonMenu
+import interfaces
 
 
 # character decor file --> pyxel edit PYXEL_RESOURCE_FILE
@@ -49,17 +49,16 @@ class Pacman:
         self.nb_ghost = 0  # number of ghosts already on the field
         self.high_score = 0
         self.offset = 0
-        self.start_button = ButtonMenu.start_up()
+        self.start_button = interfaces.start_up()
         pyxel.init(700, 700, title="Pac-man", fps=speed)
-        self.menu = ButtonMenu.Menu(pyxel.height, pyxel.width, len(self.start_button))
+        self.menu = interfaces.Menu(pyxel.height, pyxel.width, len(self.start_button))
         pyxel.camera(0, 0)
-        pyxel.load("PYXEL_RESOURCE_FILE.zip")  # loads the board items from the pyxel_resource_file.zip folder
-        pyxel.run(self.update, self.draw)
+        pyxel.load("PYXEL_RESOURCE_FILE.pyxres")  # loads the board items from the pyxel_resource_file.zip folder
         pyxel.run(self.update, self.draw)
 
     def Initialize(self, n):
         """Initializes Pac-Man's data with the chosen level's data"""
-        with open(self.start_button[n]['file-name']) as f:
+        with open("./levels_files/" + self.start_button[n]['file-name']) as f:
             plateau = f.read().splitlines()
         level = []
         for val in plateau:
@@ -75,15 +74,15 @@ class Pacman:
         self.nb_ghost = 0
         self.temporary_edible = 0
         self.offset = pyxel.width // 2 - len(self.board[0]) * 16 // 2 + 15 # permet de centrer à peu près le plateau
-        ButtonMenu.Soundtrack()
+        interfaces.Soundtrack()
         pyxel.play(0, [0, 1], loop=False)  # Permet d'etre sûr que l'instruction a bien été chargé
 
     def bestscore(self):
         if self.point > self.high_score:
-            with open('info_boards.json') as file:
+            with open('levels_files/info_boards.json') as file:
                 data = json.load(file)
             data[self.original[-1]]["score"] = self.point
-            with open("info_boards.json", "w") as info_niveau:
+            with open("levels_files/info_boards.json", "w") as info_niveau:
                 json.dump(data, info_niveau, indent=2)
             self.high_score = self.point
 
@@ -229,7 +228,7 @@ class Pacman:
                 pyxel.blt(16 * coordonnee[1] - 8 + self.offset, 16 * coordonnee[0] - 8 + self.offset, 0, 0, 64, 16, 16)
             elif self.ghost[ectoplasme][:2] == coordonnee:
                 pyxel.blt(16 * coordonnee[1] - 8 + self.offset, 16 * coordonnee[0] - 8 + self.offset, 0,
-                          ButtonMenu.research(self.coordinate, self.ghost[ectoplasme][2], 0) * 16 + 32, ectoplasme * 16, 16, 16)
+                          interfaces.research(self.coordinate, self.ghost[ectoplasme][2], 0) * 16 + 32, ectoplasme * 16, 16, 16)
 
     def decompte(self):
         if monotonic() - self.time + 3 > self.pause > monotonic() - self.time:  #  3 sec countdown
@@ -281,7 +280,7 @@ class Pacman:
                         if self.pacman[0] == [i, j]:  # displays our star
                             pyxel.blt(16 * j - 16 // 2 + self.offset, 16 * i - 16 // 2 + self.offset, 0,
                                       16 * (pyxel.frame_count % 2),
-                                      16 * ButtonMenu.research([[1, 0], [0, 1], [0, -1], [-1, 0]], self.pacman[1], 0), 16,
+                                      16 * interfaces.research([[1, 0], [0, 1], [0, -1], [-1, 0]], self.pacman[1], 0), 16,
                                       16)
                         elif self.board[i][j] == "1":  # displays the pac-gums
                             pyxel.circ(16 * j + self.offset - 1, 16 * i + self.offset - 1, 2, 10)

@@ -1,6 +1,6 @@
 [
   {
-    "file-name": "plateau_0.txt",
+    "file-name": "board_0.txt",
     "pacman-spawn": [
       17,
       14
@@ -22,7 +22,7 @@
     "score": 1748
   },
   {
-    "file-name": "plateau_1.txt",
+    "file-name": "board_1.txt",
     "pacman-spawn": [
       16,
       15
@@ -41,10 +41,10 @@
         30
       ]
     ],
-    "score": 2006
+    "score": 0
   },
   {
-    "file-name": "plateau_2.txt",
+    "file-name": "board_2.txt",
     "pacman-spawn": [
       14,
       1
